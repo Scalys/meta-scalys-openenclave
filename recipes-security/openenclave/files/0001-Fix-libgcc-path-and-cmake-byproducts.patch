@@ -1,0 +1,44 @@
+---
+ cmake/add_enclave.cmake | 12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/cmake/add_enclave.cmake b/cmake/add_enclave.cmake
+index 6b0f7420d..1a7fc5497 100644
+--- a/cmake/add_enclave.cmake
++++ b/cmake/add_enclave.cmake
+@@ -332,12 +332,8 @@ macro (add_enclave_optee)
+     DEPENDS ${OE_TZ_TA_DEV_KIT_LINKER_SCRIPT_TEMPLATE}
+     BYPRODUCTS ${TA_LINKER_SCRIPT})
+ 
+-  # Ask GCC where is libgcc.
+-  execute_process(
+-    COMMAND ${CMAKE_C_COMPILER} ${OE_TZ_TA_C_FLAGS} -print-libgcc-file-name
+-    OUTPUT_VARIABLE LIBGCC_PATH
+-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+-  get_filename_component(LIBGCC_PATH ${LIBGCC_PATH} DIRECTORY)
++  # As Yocto GCC does has path information. Set it to "." so this does not break the rest of the system
++  set(LIBGCC_PATH '.')
+ 
+   # Set up the target.
+   add_executable(${ENCLAVE_TARGET} ${ENCLAVE_SOURCES})
+@@ -379,7 +375,7 @@ macro (add_enclave_optee)
+     ${ENCLAVE_TARGET}.stripped.elf
+     COMMAND ${OBJCOPY} --strip-unneeded $<TARGET_FILE:${ENCLAVE_TARGET}>
+             $<TARGET_FILE_DIR:${ENCLAVE_TARGET}>/${ENCLAVE_UUID}.stripped.elf
+-    BYPRODUCTS $<TARGET_FILE_DIR:${ENCLAVE_TARGET}>/${ENCLAVE_UUID}.stripped.elf
++    BYPRODUCTS $TARGET_FILE_DIR:${ENCLAVE_TARGET}/${ENCLAVE_UUID}.stripped.elf
+   )
+   add_dependencies(${ENCLAVE_TARGET}.stripped.elf ${ENCLAVE_TARGET})
+ 
+@@ -394,7 +390,7 @@ macro (add_enclave_optee)
+       --version 0 --in
+       $<TARGET_FILE_DIR:${ENCLAVE_TARGET}>/${ENCLAVE_UUID}.stripped.elf --out
+       $<TARGET_FILE_DIR:${ENCLAVE_TARGET}>/${ENCLAVE_UUID}.ta
+-    BYPRODUCTS $<TARGET_FILE_DIR:${ENCLAVE_TARGET}>/${ENCLAVE_UUID}.ta)
++    BYPRODUCTS $TARGET_FILE_DIR:${ENCLAVE_TARGET}/${ENCLAVE_UUID}.ta)
+   add_dependencies(${ENCLAVE_TARGET}.ta ${ENCLAVE_TARGET}.stripped.elf)
+ 
+   # Set linker options.
+-- 
+2.25.1
+
